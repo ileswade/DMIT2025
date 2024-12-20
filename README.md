@@ -197,7 +197,7 @@ Use this code template for database connections:
         - Password: `student`
 
 3. Project Structure
-
+```text
     project_folder/
     ├── docker-compose.yml
     ├── php.ini
@@ -208,7 +208,7 @@ Use this code template for database connections:
     ├── php/
     │   └── index.php
     └── mysql_data/
-
+```
 4. Environment Features:
    - PHP errors display in browser
    - MySQL data persists between restarts
