@@ -1,6 +1,6 @@
 # Complete Docker PHP Development Environment Guide
-# Version 0.1 
-# Date: 2024-12-19
+## Version 0.1 
+### Date: 2024-12-19
 
 ## Table of Contents
 1. Installing Docker
