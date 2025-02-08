@@ -1,6 +1,8 @@
 # Docker Compose file for PHP, MySQL and PHPMyAdmin
-# Version 0.1 
-# Date: 2024-12-19
+# Version 0.2 
+# Date: 2025-02-07
+
+# Added PHP Compose functionality
 
 services:
   web:
@@ -16,6 +18,10 @@ services:
       - APACHE_DOCUMENT_ROOT=/var/www/html
     command: >
       bash -c "
+        apt-get update &&
+        apt-get install -y zip unzip git curl &&
+        curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer &&
+        composer install &&
         docker-php-ext-install pdo pdo_mysql && 
         a2enmod rewrite &&
         apache2-foreground"
