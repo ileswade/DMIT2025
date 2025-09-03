@@ -55,7 +55,7 @@
     $projects = getAvailableProjects();
     
     if (empty($projects) || (count($projects) == 1 && $projects[0] == 'root')) {
-        echo "<div class='info'>No project databases found. Create a project folder to automatically get a dedicated database.</div>";
+        echo "<div class='info'>No project databases found. Databases are created on-demand when you use the 'Create Database' button in each project.</div>";
     } else {
         echo "<table>";
         echo "<thead><tr><th>Project Name</th><th>Database Name</th><th>Status</th><th>Details</th></tr></thead>";
@@ -127,7 +127,7 @@
             <li>Get a connection: <code>$pdo = getDatabase();</code> (auto-detects project)</li>
             <li>Or specify a project: <code>$pdo = getDatabase('lab1');</code></li>
             <li>Each project gets its own isolated database</li>
-            <li>Databases are created automatically when you first access them</li>
+            <li>Databases are created on-demand using the 'Create Database' button in each project</li>
         </ul>
     </div>
     

@@ -125,6 +125,13 @@ require_once '../shared/database.php';
             
         } catch (Exception $e) {
             echo "<div class='error'>❌ Database connection failed: " . htmlspecialchars($e->getMessage()) . "</div>";
+            
+            // Show database setup option when connection fails
+            echo "<div class='info'>";
+            echo "<strong>🔧 Database Setup Required</strong><br>";
+            echo "Your Lab 1 database needs to be created. Click below to set up your isolated database.<br><br>";
+            echo "<a href='../shared/database-maintenance.php?project=lab1' class='back-link' style='background: #28a745;'>⚙️ Database Maintenance</a>";
+            echo "</div>";
         }
         ?>
 
@@ -179,6 +186,7 @@ require_once '../shared/database.php';
         <p>
             <a href="http://localhost:8081" target="_blank" class="back-link">📊 phpMyAdmin</a>
             <a href="../shared/test-db.php" class="back-link">🔌 Test All Databases</a>
+            <a href="../shared/database-maintenance.php?project=lab1" class="back-link" style="background: #28a745;">🛠️ DB Maintenance</a>
         </p>
 
         <div class="info">

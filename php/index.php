@@ -105,28 +105,58 @@
         <?php
         require_once 'shared/database.php';
         
+        // Define project order: sb first, labs in order, then project
+        $project_order = ['sb', 'lab1', 'lab2', 'lab3', 'lab4', 'project'];
+        
         // Scan for project directories
-        $project_dirs = [];
+        $found_dirs = [];
         $php_dir = __DIR__;
         if ($handle = opendir($php_dir)) {
             while (false !== ($entry = readdir($handle))) {
-                if ($entry != "." && $entry != ".." && $entry != "shared" && is_dir($php_dir . '/' . $entry)) {
-                    $project_dirs[] = $entry;
+                if ($entry != "." && $entry != ".." && $entry != "shared" && $entry != "vendor" && is_dir($php_dir . '/' . $entry)) {
+                    $found_dirs[] = $entry;
                 }
             }
             closedir($handle);
         }
         
+        // Arrange projects in the desired order
+        $project_dirs = [];
+        foreach ($project_order as $project) {
+            if (in_array($project, $found_dirs)) {
+                $project_dirs[] = $project;
+            }
+        }
+        // Add any unexpected projects at the end
+        foreach ($found_dirs as $dir) {
+            if (!in_array($dir, $project_dirs)) {
+                $project_dirs[] = $dir;
+            }
+        }
+        
         // Get available databases
         $available_databases = getAvailableProjects();
         
-        // Display existing projects
+        // Display existing projects in order
         foreach ($project_dirs as $project) {
             $has_index = file_exists($php_dir . '/' . $project . '/index.php');
             $has_database = in_array($project, $available_databases);
             
+            // Set project-specific icons and titles
+            $project_info = [
+                'sb' => ['icon' => '🏖️', 'title' => 'Sandbox - Playground & Exercises'],
+                'lab1' => ['icon' => '🧪', 'title' => 'Lab 1'],
+                'lab2' => ['icon' => '🧪', 'title' => 'Lab 2'],
+                'lab3' => ['icon' => '🧪', 'title' => 'Lab 3'],
+                'lab4' => ['icon' => '🧪', 'title' => 'Lab 4'],
+                'project' => ['icon' => '🚀', 'title' => 'Final Project - Large Assignment']
+            ];
+            
+            $icon = $project_info[$project]['icon'] ?? '📂';
+            $title = $project_info[$project]['title'] ?? ucfirst($project);
+            
             echo "<div class='project-card'>";
-            echo "<h3>📂 " . htmlspecialchars($project) . "</h3>";
+            echo "<h3>$icon " . htmlspecialchars($title) . "</h3>";
             echo "<p><strong>Status:</strong> ";
             echo $has_index ? "<span class='status exists'>Has index.php</span>" : "<span class='status missing'>No index.php</span>";
             echo " ";
@@ -135,7 +165,7 @@
             
             if ($has_index) {
                 echo "<a href='" . htmlspecialchars($project) . "/' class='project-link'>🔗 Open Project</a>";
-                echo " <a href='shared/export-database.php?project=" . urlencode($project) . "' class='project-link' style='background: #28a745;'>📦 Export DB</a>";
+                echo " <a href='shared/database-maintenance.php?project=" . urlencode($project) . "' class='project-link' style='background: #28a745;'>🛠️ DB Maintenance</a>";
             } else {
                 echo "<p style='color: #666;'>Create an index.php file in the " . htmlspecialchars($project) . "/ folder to get started.</p>";
             }
@@ -164,7 +194,9 @@
     <div class="info-box">
         <strong>Database Info:</strong>
         <ul>
-            <li>Each project gets its own database: <code>php_course_[project-name]</code></li>
+            <li>Databases are created <strong>on-demand</strong> - only when you need them for specific labs</li>
+            <li>Each project gets its own isolated database: <code>php_course_[project-name]</code></li>
+            <li>Click <strong>"Reset Database"</strong> in any project to create/recreate its database</li>
             <li>Use the shared database utility: <code>require_once '../shared/database.php';</code></li>
             <li>phpMyAdmin login: <strong>student</strong> / <strong>student</strong></li>
         </ul>

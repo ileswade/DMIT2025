@@ -36,6 +36,10 @@ function getDatabase($project_name = null) {
         $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
         return $pdo;
     } catch(PDOException $e) {
+        // Check if it's a "database doesn't exist" error
+        if (strpos($e->getMessage(), '1049') !== false || strpos($e->getMessage(), "Unknown database") !== false) {
+            throw new Exception("Database '{$dbname}' does not exist yet. Click 'Reset Database' to create it.");
+        }
         throw new Exception("Database connection failed for project '{$project_name}': " . $e->getMessage());
     }
 }
@@ -58,8 +62,8 @@ function getCurrentProjectName() {
 }
 
 /**
- * Get list of available project databases
- * @return array List of project names
+ * Get list of available project databases (only ones that actually exist)
+ * @return array List of project names that have databases
  */
 function getAvailableProjects() {
     try {
@@ -78,7 +82,7 @@ function getAvailableProjects() {
         
         return $projects;
     } catch (Exception $e) {
-        return ['root']; // Fallback if query fails
+        return ['root']; // Fallback - only root database exists initially
     }
 }
 
