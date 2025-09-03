@@ -44,40 +44,66 @@
 
 ## Part 2: Setting Up Your Development Environment
 
-### Initial Setup
+### Initial Setup (One-Time Only)
 
 1. Open terminal/command prompt and navigate to where you store your programs for this course
 
-2. Create a new project folder by cloaning the DMIT2025 folder
+2. Clone the DMIT2025 development environment
    ```bash
    git clone git@github.com:ileswade/DMIT2025.git
-   # ren DMIT2025 projectname    # Windows
-   # mv DMIT2025 projectname     # Mac
+   cd DMIT2025
    ```
 
-3. Remove the GIT repository
+3. Review the configuration files:
+   - `docker-compose.yml`: Instructions to start the Docker containers (PHP web server and MySQL server)
+   - `php.ini`: PHP server configuration
+   - `php/index.php`: Project dashboard and PHP info display
+
+### Multi-Project Workflow (NEW!)
+
+**This environment now supports multiple projects without port conflicts or repeated setup!**
+
+#### Creating Your First Project
+
+1. **Start the environment** (one-time setup):
    ```bash
-   # rm -rf .git                 # Mac
-   # rm -r -force .git           # Windows - Powershell
-   # rmdir /s /q .git            # Windows - CMD
+   docker compose up -d
    ```
 
-4. Recreate a new GIT repository (Optional)
+2. **Create a new project folder**:
    ```bash
+   mkdir php/lab1        # For Lab 1
+   mkdir php/lab2        # For Lab 2
+   mkdir php/assignment1 # For assignments
+   ```
+
+3. **Create your project files**:
+   ```bash
+   cd php/lab1
+   # Create your main PHP file
+   touch index.php
+   
+   # Initialize git for this specific project (recommended)
    git init
    git add .
-   git commit -m "Initial Commit'
+   git commit -m "Initial lab1 setup"
    ```
 
-5. Look for and review current configuration files:
-   - `docker-compose.yml`: Serves as the instructions to start the Docker Containers representing the PHP Web server and MYSQL server
-   - `php.ini`: Serves as configuration information used by the PHP server
-   - `index.php`: Default "PHP Info" to display the version of the current PHP Server software
+4. **Access your projects**:
+   - Lab 1: [http://localhost:8080/lab1/](http://localhost:8080/lab1/)
+   - Lab 2: [http://localhost:8080/lab2/](http://localhost:8080/lab2/)
+   - Main dashboard: [http://localhost:8080](http://localhost:8080)
+
+#### Project Benefits
+- ✅ **No port conflicts** - all projects share the same Docker environment
+- ✅ **Separate databases** - each project gets `php_course_[project-name]`
+- ✅ **Easy switching** - work on multiple projects simultaneously
+- ✅ **Individual git repos** - each project can have its own version control
 
 
 ### Starting Your Environment
 
-1. Open terminal/command prompt in your project folder
+1. Open terminal/command prompt in the main project folder (where `docker-compose.yaml` is located)
 
 2. Start the Docker containers:
 
@@ -89,8 +115,9 @@
 
 3. Test your setup by visiting:
 
-   - PHP Application: [http://localhost:8080](http://localhost:8080)
-   - phpMyAdmin: [http://localhost:8081](http://localhost:8081)
+   - **Project Dashboard**: [http://localhost:8080](http://localhost:8080) - Shows all your projects
+   - **phpMyAdmin**: [http://localhost:8081](http://localhost:8081) - Database management
+   - **Example Project**: [http://localhost:8080/lab1/](http://localhost:8080/lab1/) - Sample project
 
 ## Part 3: Working with the Database
 
@@ -122,24 +149,45 @@ Important notes about initialization scripts:
      - Username: `root`
      - Password: `studentpass`
 
-#### Connecting from PHP
+#### Connecting from PHP (NEW Easy Method)
 
-Use this code template for database connections:
+Use the shared database helper for automatic project detection:
 
 ```php
-   <?php
-   $host = 'mysql';  // Docker service name
-   $dbname = 'php_course';
-   $username = 'student';
-   $password = 'student';
+<?php
+// Include the shared database utility
+require_once '../shared/database.php';
 
-   try {
-      $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
-      $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-      echo "Connected successfully";
-   } catch(PDOException $e) {
-      echo "Connection failed: " . $e->getMessage();
-   }
+try {
+    // Auto-detects your project and connects to the right database
+    $pdo = getDatabase();
+    echo "Connected successfully to your project database!";
+    
+    // Create tables, insert data, etc.
+    
+} catch(Exception $e) {
+    echo "Connection failed: " . $e->getMessage();
+}
+```
+
+#### Manual Connection (Advanced)
+
+If you need to connect manually or to a specific project's database:
+
+```php
+<?php
+$host = 'mysql';  // Docker service name
+$dbname = 'php_course_lab1';  // Your specific project database
+$username = 'student';
+$password = 'student';
+
+try {
+   $pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+   $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+   echo "Connected successfully";
+} catch(PDOException $e) {
+   echo "Connection failed: " . $e->getMessage();
+}
 ```
 
 ## Part 4: Troubleshooting and Management
@@ -203,13 +251,25 @@ Use this code template for database connections:
     ├── php.ini
     ├── README.md
     ├── PROJECT.md
+    ├── NEW-PROJECT-SETUP.md        # How to create new projects
     ├── init-scripts/
-    │   └── 01-create-tables.sql
+    │   └── 01-create-tables.sql    # Creates all project databases
     ├── php/
-    │   └── index.php
+    │   ├── index.php               # Project dashboard
+    │   ├── shared/                 # Shared utilities
+    │   │   ├── database.php        # Database helper
+    │   │   └── test-db.php         # Connection testing
+    │   ├── lab1/                   # Your Lab 1 project
+    │   │   └── index.php
+    │   ├── lab2/                   # Your Lab 2 project
+    │   └── assignment1/            # Your assignment project
     └── mysql_data/
 ```
 4. Environment Features:
+   - **Multi-project support** - work on multiple projects simultaneously
+   - **Automatic database creation** - each project gets its own database
+   - **Project dashboard** - view all projects at http://localhost:8080
+   - **Shared utilities** - database helper and testing tools
    - PHP errors display in browser
    - MySQL data persists between restarts
    - Automatic container restart on failure
@@ -223,18 +283,65 @@ Use this code template for database connections:
 
 ## Part 5: Submission Instructions
 
-For any course submissions, check with your instructor if you need to submit the database 'as is' (Database State) or if you will can remove the database and provide 'just the scripts to rebuild and populate the database'
+### 📦 **NEW: Super Simple Submission Process**
 
-### Option 1: Submit with Database State
+Each project now has easy tools to prepare submissions with database data included.
 
-1. Leave your mysql_data folder in place
-2. Zip your entire project folder
-3. Name it: `surname_firstname_projectname.zip`
+#### **Easy Database Backup (from your project folder):**
 
-### Option 2: Submit without Database State
+1. **Navigate to your project:**
+   ```bash
+   cd php/lab1                    # Go into your specific project
+   ```
 
-If the project does not require a database, OR if the script file will populate the insital data for the instructor, you do NOT need to submit the Database State.  
+2. **Backup your database:**
+   ```bash
+   php ../shared/backup-database.php # Creates SQL backup file automatically
+   ```
 
-1. Delete the mysql_data folder
-2. Zip your entire project folder
-3. Name it: `surname_firstname_projectname.zip`
+3. **Zip your project:**
+   ```bash
+   # Zip the entire project folder (from parent directory)
+   cd ..
+   zip -r LastName_FirstName_Lab1.zip lab1/
+   ```
+
+The backup script automatically:
+- ✅ Detects which project you're working on
+- ✅ Exports your exact database structure and data  
+- ✅ Creates a SQL file in your project folder
+- ✅ Ready for instructor import
+
+#### **Alternative: Use Web Interface**
+- Visit: http://localhost:8080/shared/export-database.php
+- Select your project and export database
+
+### **What to Submit:**
+Your zip file should contain:
+```
+LastName_FirstName_Lab1.zip
+└── lab1/
+    ├── index.php                    # Your PHP files
+    ├── process.php                  
+    ├── styles.css                   # Other files
+    └── database-backup-lab1.sql     # 🎯 DATABASE BACKUP
+```
+
+### **For Instructors:**
+To recreate student work:
+1. Extract the zip file
+2. Import the SQL file into MySQL/phpMyAdmin  
+3. Test the PHP code against the imported database
+
+**No more mysql_data folders or complex setup needed!** 🎉
+
+---
+
+## 📚 Additional Documentation
+
+- **[📋 Complete Student Submission Guide](docs/STUDENT-SUBMISSION-GUIDE.md)** - Step-by-step submission process
+- **[🛠️ New Project Setup Guide](docs/NEW-PROJECT-SETUP.md)** - How to create and manage projects  
+- **[🏗️ Project Template](docs/PROJECT.md)** - Template for project documentation
+- **[🤖 Claude Code Guide](docs/CLAUDE.md)** - For AI development assistance
+
+All documentation is organized in the `docs/` folder for easy access.
